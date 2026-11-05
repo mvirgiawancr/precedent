@@ -1,0 +1,303 @@
+<!doctype html>
+<!-- The whole film is one deterministic timeline: render.mjs seeks to a frame time and
+     screenshots. Real app footage is pre-extracted to stills, so nothing decodes at render
+     time and any frame can be re-rendered alone. -->
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Precedent</title>
+<style>
+@font-face { font-family: "Antonio"; src: url("fonts/antonio.woff2") format("woff2"); font-weight: 100 700; }
+@font-face { font-family: "Archivo"; src: url("fonts/archivo.woff2") format("woff2"); font-weight: 400 700; }
+@font-face { font-family: "Azeret Mono"; src: url("fonts/azeret-mono.woff2") format("woff2"); font-weight: 100 700; }
+
+:root {
+  --paper: oklch(97.2% 0.003 250);
+  --paper-deep: oklch(93.8% 0.004 250);
+  --rule: oklch(86% 0.006 250);
+  --ink: oklch(20% 0.008 250);
+  --ink-soft: oklch(38% 0.008 250);
+  --ink-faint: oklch(55% 0.008 250);
+  --accent: oklch(55% 0.2 25);
+  --night: oklch(16% 0.006 250);
+  --display: "Antonio", "Arial Narrow", sans-serif;
+  --body: "Archivo", system-ui, sans-serif;
+  --mono: "Azeret Mono", monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 1920px; height: 1080px; overflow: hidden; background: var(--night); }
+body { font-family: var(--body); color: var(--ink); -webkit-font-smoothing: antialiased; }
+#stage { position: relative; width: 1920px; height: 1080px; overflow: hidden; }
+.scene { position: absolute; inset: 0; opacity: 0; }
+
+#subs { position: absolute; left: 0; right: 0; bottom: 42px; display: flex; justify-content: center; z-index: 60; }
+.cue {
+  position: absolute; bottom: 0; max-width: 1120px; padding: 13px 26px 14px;
+  background: oklch(12% 0.006 250 / 0.92); color: oklch(96% 0.004 250);
+  font-family: var(--body); font-size: 27px; line-height: 1.32; letter-spacing: -0.005em;
+  text-align: center; opacity: 0;
+}
+.cue b { font-weight: 700; color: #fff; }
+.cue i { font-style: normal; color: oklch(80% 0.13 25); }
+
+.eyebrow { font-family: var(--mono); font-size: 19px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-faint); }
+.stamp {
+  display: inline-block; font-family: var(--mono); font-size: 17px; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--accent); border: 2px solid var(--accent); padding: 5px 12px;
+}
+
+/* 1 — the ticket */
+#s1 { background: var(--night); }
+#s1 .wrap { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; padding: 0 190px; }
+#s1 .key { font-family: var(--mono); font-size: 24px; color: oklch(60% 0.01 250); letter-spacing: 0.1em; }
+#s1 .title { font-family: var(--display); font-weight: 600; font-size: 94px; line-height: 1.02; color: oklch(97% 0.003 250); margin-top: 24px; letter-spacing: -0.015em; max-width: 1440px; min-height: 190px; }
+#s1 .log { margin-top: 54px; display: grid; gap: 18px; font-family: var(--mono); font-size: 26px; }
+#s1 .row { display: flex; gap: 26px; align-items: baseline; color: oklch(74% 0.01 250); }
+#s1 .when { color: oklch(50% 0.01 250); min-width: 148px; }
+#s1 .wont { color: oklch(64% 0.15 25); }
+
+/* footage scenes */
+.frame { position: absolute; overflow: hidden; background: #fff; border: 1px solid var(--rule); box-shadow: 0 40px 100px -50px oklch(20% 0.02 250 / 0.55); }
+.frame img { position: absolute; width: 100%; display: block; }
+#s2, #s5, #s6, #s7 { background: var(--paper); }
+#s3, #s4 { background: var(--paper-deep); }
+
+#s2 .frame { left: 88px; top: 84px; width: 1744px; height: 852px; }
+#s2 .frame img { top: -62px; }
+#s2 .caption { position: absolute; left: 88px; top: 30px; display: flex; gap: 18px; align-items: center; z-index: 3; }
+
+#s3 .frame, #s4 .frame, #s5 .frame, #s6 .frame { left: 60px; top: 56px; width: 1800px; height: 900px; }
+#s3 .frame img, #s4 .frame img, #s5 .frame img, #s6 .frame img { top: -56px; }
+
+.mark { position: absolute; border: 2px solid var(--accent); opacity: 0; }
+#s4 .stamp { position: absolute; left: 62px; top: 972px; background: oklch(97% 0.003 250 / .96); }
+
+.tag {
+  position: absolute; right: 100px; top: 104px; font-family: var(--mono); font-size: 19px; letter-spacing: 0.15em;
+  text-transform: uppercase; padding: 9px 15px; opacity: 0; background: #fff; border: 2px solid var(--ink-faint); color: var(--ink-soft);
+}
+#s6 .tag { border-color: var(--ink-soft); color: var(--ink); }
+
+/* 7 — the tools, as declared in the manifest */
+#s7 .wrap { position: absolute; inset: 0; padding: 104px 190px; }
+#s7 h2 { font-family: var(--display); font-weight: 600; font-size: 70px; letter-spacing: -0.01em; margin-top: 18px; }
+#s7 .tools { margin-top: 44px; }
+#s7 .tool { display: grid; grid-template-columns: 460px 1fr; gap: 44px; align-items: baseline; padding: 24px 0; border-top: 1px solid var(--rule); }
+#s7 .tool:last-child { border-bottom: 1px solid var(--rule); }
+#s7 .name { font-family: var(--mono); font-size: 27px; color: var(--ink); }
+#s7 .what { font-family: var(--body); font-size: 24px; color: var(--ink-soft); line-height: 1.42; }
+#s7 .foot { margin-top: 38px; font-family: var(--mono); font-size: 19px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-faint); }
+
+/* 8 — close */
+#s8 { background: var(--night); }
+#s8 .wrap { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; padding: 0 190px; }
+#s8 h1 { font-family: var(--display); font-weight: 600; font-size: 168px; line-height: 0.9; color: oklch(97% 0.003 250); letter-spacing: -0.02em; }
+#s8 .sub { font-family: var(--body); font-size: 40px; color: oklch(74% 0.012 250); margin-top: 28px; }
+#s8 .rule { height: 5px; width: 0; background: var(--accent); margin-top: 44px; }
+#s8 .meta { margin-top: 38px; display: flex; gap: 42px; font-family: var(--mono); font-size: 22px; color: oklch(64% 0.01 250); letter-spacing: 0.08em; }
+</style>
+</head>
+<body>
+<div id="stage">
+
+  <section class="scene" id="s1">
+    <div class="wrap">
+      <div class="key">KAN-14 · opened</div>
+      <h1 class="title" id="t1"></h1>
+      <div class="log">
+        <div class="row" id="r1"><span class="when">Mar 2024</span><span class="wont">closed — won't do</span></div>
+        <div class="row" id="r2"><span class="when">Nov 2024</span><span class="wont">closed — won't do</span></div>
+        <div class="row" id="r3"><span class="when">Aug 2025</span><span>opened again</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="scene" id="s2">
+    <div class="caption"><span class="stamp">On file</span><span class="eyebrow">the decisions, not the discussion</span></div>
+    <div class="frame"><img id="i2" alt="" /></div>
+  </section>
+
+  <section class="scene" id="s3">
+    <div class="frame"><img id="i3" alt="" /></div>
+    <div class="mark" id="m1" style="left:1387px;top:328px;width:400px;height:64px"></div>
+  </section>
+
+  <section class="scene" id="s4">
+    <div class="frame"><img id="i4" alt="" /></div>
+  </section>
+
+  <section class="scene" id="s5">
+    <div class="frame"><img id="i5" alt="" /></div>
+    <div class="tag" id="g1">nothing recorded</div>
+  </section>
+
+  <section class="scene" id="s6">
+    <div class="frame"><img id="i6" alt="" /></div>
+    <div class="tag" id="g2">on file · not a contradiction</div>
+  </section>
+
+  <section class="scene" id="s7">
+    <div class="wrap">
+      <div class="eyebrow">rovo:mcp · rovo:agent</div>
+      <h2 id="s7h">The same ledger, as tools.</h2>
+      <div class="tools">
+        <div class="tool"><span class="name">check-precedent</span><span class="what">Does this work item contradict something already decided? Returns the decision, its state and its source.</span></div>
+        <div class="tool"><span class="name">find-decision</span><span class="what">Find the decision that covers a topic, with the words that decided it.</span></div>
+        <div class="tool"><span class="name">record-decision</span><span class="what">File a new decision, or replace one, so the next person inherits it.</span></div>
+        <div class="tool"><span class="name">list-decision-chain</span><span class="what">What replaced what. A superseded decision is never cited as current.</span></div>
+      </div>
+      <div class="foot">An agent can ask before it proposes</div>
+    </div>
+  </section>
+
+  <section class="scene" id="s8">
+    <div class="wrap">
+      <h1 id="s8h">Precedent</h1>
+      <div class="sub" id="s8sub">The decision ledger for Jira.</div>
+      <div class="rule" id="s8rule"></div>
+      <div class="meta" id="s8meta">
+        <span>forge</span><span>rovo:mcp</span><span>MIT</span><span>github.com/mvirgiawancr/precedent</span>
+      </div>
+    </div>
+  </section>
+
+  <div id="subs"></div>
+</div>
+
+<script src="gsap.min.js"></script>
+<script>
+gsap.registerPlugin();
+
+const DUR = 52;
+// [start, end, text] — each cue is bound to the scene that is actually on screen then.
+const CUES = [
+  [0.8, 5.2, 'A ticket opened for the third time. <i>The decision that killed it was never written down.</i>'],
+  [5.6, 9.5, 'So it gets written down — in the words that decided it.'],
+  [10.0, 14.4, 'Precedent is a ledger of decisions, not a search box over comments.'],
+  [15.2, 19.6, 'Open a work item and it answers one question before you build.'],
+  [20.0, 22.7, '<b>Contradicts.</b> It shares 4 terms with OIDC-2026-01.'],
+  [23.5, 27.9, 'Every claim opens its source — the comment, in the issue, highlighted.'],
+  [28.9, 33.2, 'And when nothing is at stake, it says nothing.'],
+  [34.3, 38.4, '<b>Precision is the product.</b> A panel that cries wolf gets switched off.'],
+  [39.4, 47.0, 'The same ledger is declared as MCP tools, so an agent can ask before it proposes.'],
+  [48.3, 51.2, 'Built for Codegeist 2026.']
+];
+
+const sub = document.getElementById('subs');
+const cueEls = CUES.map(([, , text]) => {
+  const el = document.createElement('div');
+  el.className = 'cue';
+  el.innerHTML = text;
+  sub.appendChild(el);
+  return el;
+});
+
+const tl = gsap.timeline({ paused: true });
+const title = 'Replace OIDC with shared API keys for the gateway';
+const typed = { n: 0 };
+
+tl.set('#s1', { opacity: 1 }, 0)
+  .to(typed, {
+    n: title.length, duration: 2.2, ease: 'none',
+    onUpdate: () => { document.getElementById('t1').textContent = title.slice(0, Math.round(typed.n)); }
+  }, 0.55)
+  .fromTo('#r1', { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.5 }, 3.0)
+  .fromTo('#r2', { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.5 }, 3.5)
+  .fromTo('#r3', { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.5 }, 4.0)
+  .to('#s1', { opacity: 0, duration: 0.5 }, 5.5);
+
+tl.set('#s2', { opacity: 1 }, 5.9)
+  .fromTo('#s2 .frame', { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: 0.85, ease: 'power2.out' }, 5.95)
+  .fromTo('#s2 .caption', { opacity: 0, x: -20 }, { opacity: 1, x: 0, duration: 0.65 }, 6.2)
+  .to('#s2', { opacity: 0, duration: 0.5 }, 14.4);
+
+tl.set('#s3', { opacity: 1 }, 14.8)
+  .fromTo('#s3 .frame', { opacity: 0, scale: 0.986 }, { opacity: 1, scale: 1, duration: 0.75, ease: 'power2.out' }, 14.85)
+  .fromTo('#m1', { opacity: 0 }, { opacity: 1, duration: 0.4 }, 20.4)
+  .to('#m1', { opacity: 0, duration: 0.35 }, 22.4)
+  .to('#s3', { opacity: 0, duration: 0.45 }, 22.7);
+
+tl.set('#s4', { opacity: 1 }, 23.1)
+  .fromTo('#s4 .frame', { opacity: 0, y: 22 }, { opacity: 1, y: 0, duration: 0.7, ease: 'power2.out' }, 23.15)
+  .to('#s4', { opacity: 0, duration: 0.45 }, 28.1);
+
+tl.set('#s5', { opacity: 1 }, 28.5)
+  .fromTo('#s5 .frame', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.7 }, 28.55)
+  .fromTo('#g1', { opacity: 0, scale: 0.97 }, { opacity: 1, scale: 1, duration: 0.45 }, 30.2)
+  .to('#s5', { opacity: 0, duration: 0.45 }, 33.4);
+
+tl.set('#s6', { opacity: 1 }, 33.8)
+  .fromTo('#s6 .frame', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.7 }, 33.85)
+  .fromTo('#g2', { opacity: 0, scale: 0.97 }, { opacity: 1, scale: 1, duration: 0.45 }, 35.6)
+  .to('#s6', { opacity: 0, duration: 0.5 }, 38.5);
+
+tl.set('#s7', { opacity: 1 }, 38.9)
+  .fromTo('#s7 h2', { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.75 }, 39.0)
+  .fromTo('#s7 .foot', { opacity: 0 }, { opacity: 1, duration: 0.6 }, 43.2)
+  .to('#s7', { opacity: 0, duration: 0.5 }, 47.3);
+
+tl.set('#s8', { opacity: 1 }, 47.7)
+  .fromTo('#s8h', { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' }, 47.75)
+  .fromTo('#s8sub', { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.7 }, 48.15)
+  .to('#s8rule', { width: 700, duration: 0.9, ease: 'power2.inOut' }, 48.4)
+  .fromTo('#s8meta', { opacity: 0 }, { opacity: 1, duration: 0.6 }, 48.85)
+  .to('#s8', { opacity: 0, duration: 0.6 }, 51.5);
+
+[...document.querySelectorAll('#s7 .tool')].forEach((row, i) => {
+  tl.fromTo(row, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.5 }, 39.5 + i * 0.75);
+});
+
+CUES.forEach(([a, b], i) => {
+  tl.fromTo(cueEls[i], { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.3 }, a)
+    .to(cueEls[i], { opacity: 0, duration: 0.28 }, b);
+});
+
+// Real footage, pre-extracted to 30 stills per second. The timeline only picks which one.
+const SCENES = [
+  { id: 'i2', dir: 'ledger', start: 5.95, frames: 270 },
+  { id: 'i3', dir: 'verdict', start: 14.85, frames: 255 },
+  { id: 'i4', dir: 'source', start: 23.15, frames: 168 },
+  { id: 'i5', dir: 'quiet', start: 28.55, frames: 177 },
+  { id: 'i6', dir: 'related', start: 33.85, frames: 162 }
+];
+
+const frameFor = (s, t) => {
+  const local = t - s.start;
+  if (local < 0) return null;
+  return Math.min(s.frames, Math.max(1, Math.round(local * 30) + 1));
+};
+
+window.__seek = async (t) => {
+  tl.seek(t, false);
+  const pending = [];
+  for (const s of SCENES) {
+    const el = document.getElementById(s.id);
+    const n = frameFor(s, t);
+    if (n === null) continue;
+    const src = `stills/${s.dir}/${String(n).padStart(4, '0')}.jpg`;
+    if (!el.getAttribute('src')?.endsWith(src)) {
+      el.src = src;
+      pending.push(el.decode().catch(() => {}));
+    }
+  }
+  await Promise.all(pending);
+  await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+  return tl.time();
+};
+
+// A first pass through every clip warms the images the renderer will ask for.
+window.__ready = async () => {
+  await document.fonts.ready;
+  for (const s of SCENES) {
+    const el = document.getElementById(s.id);
+    el.src = `stills/${s.dir}/0001.jpg`;
+    await el.decode().catch(() => {});
+  }
+  window.__seek(0);
+  return true;
+};
+window.__duration = DUR;
+</script>
+</body>
+</html>

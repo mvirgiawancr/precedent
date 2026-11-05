@@ -4,3 +4,7 @@ shots/
 landing/.hallmark/
 .DS_Store
 *.log
+video/work/
+video/audio/
+video/stills/
+video/node_modules/
