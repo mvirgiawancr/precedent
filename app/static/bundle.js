@@ -6312,6 +6312,13 @@ var root = document.getElementById("app");
 var selected = null;
 var paint = null;
 var demo = [];
+document.addEventListener("click", (event) => {
+  const link = event.target.closest?.("a.source");
+  if (!link) return;
+  event.preventDefault();
+  const { pathname, search } = new URL(link.href, window.location.origin);
+  import_bridge.router.navigate(`${pathname}${search}`);
+});
 async function seed() {
   const result = await (0, import_bridge.invoke)("seed");
   if (!result?.created) throw new Error(result?.reason ?? "Nothing was filed.");

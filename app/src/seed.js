@@ -19,28 +19,29 @@ async function projectKeyFor(issueKey) {
     const res = await api.asApp().requestJira(route`/rest/api/3/issue/${issueKey}?fields=project`);
     if (res.status === 200) {
       const key = (await res.json()).fields?.project?.key;
-      if (key) return key;
+      if (key) return { key };
     }
   }
-  const jql = 'order by created DESC';
-  const res = await api
-    .asApp()
-    .requestJira(route`/rest/api/3/search/jql?jql=${jql}&maxResults=5&fields=project`);
-  if (res.status !== 200) return null;
-  return (await res.json()).issues?.[0]?.fields?.project?.key ?? null;
+  // The global page has no issue in context, so fall back to any project the app can see.
+  // /project/search is stable; the JQL search endpoint is the one that moves between versions.
+  const res = await api.asApp().requestJira(route`/rest/api/3/project/search?maxResults=1`);
+  if (res.status !== 200) {
+    return { key: null, reason: `project search failed (${res.status})` };
+  }
+  const key = (await res.json()).values?.[0]?.key ?? null;
+  return { key, reason: key ? null : 'the app cannot see any Jira project on this site' };
 }
 
 /** The first usable issue type in a project, preferring Task then Story. */
 async function issueTypeId(projectKey) {
-  const res = await api
-    .asApp()
-    .requestJira(route`/rest/api/3/issue/creatable?projectKeys=${projectKey}&maxResults=50`);
-  if (res.status !== 200) return null;
-  const data = await res.json();
-  const types = (data.issueTypes ?? data.projects?.[0]?.issuetypes ?? []).filter((t) => !t.subtask);
+  const res = await api.asApp().requestJira(route`/rest/api/3/project/${projectKey}`);
+  if (res.status !== 200) return { id: null, reason: `project ${projectKey} unreadable (${res.status})` };
+  const types = ((await res.json()).issueTypes ?? []).filter((t) => !t.subtask);
   const pick =
     types.find((t) => t.name === 'Task') ?? types.find((t) => t.name === 'Story') ?? types[0];
-  return pick?.id ?? null;
+  return pick?.id
+    ? { id: pick.id }
+    : { id: null, reason: `project ${projectKey} offers the app no issue type it can create` };
 }
 
 async function createIssue(projectKey, summary, typeId) {
@@ -79,16 +80,17 @@ async function addComment(issueKey, text) {
 
 export async function seedDecisions(issueKey) {
   const base = await siteBase();
-  const projectKey = await projectKeyFor(issueKey);
-  if (!projectKey) {
-    return { created: 0, projectKey: null, issues: [], reason: 'no Jira project is visible to the app' };
+  const project = await projectKeyFor(issueKey);
+  if (!project.key) {
+    return { created: 0, projectKey: null, issues: [], reason: project.reason };
   }
+  const projectKey = project.key;
 
-  const typeId = await issueTypeId(projectKey);
+  const type = await issueTypeId(projectKey);
   const demo = [];
   const failures = [];
-  for (const summary of typeId ? DEMO_ISSUES : []) {
-    const made = await createIssue(projectKey, summary, typeId);
+  for (const summary of type.id ? DEMO_ISSUES : []) {
+    const made = await createIssue(projectKey, summary, type.id);
     if (made.key) demo.push({ key: made.key, summary, url: base ? `${base}/browse/${made.key}` : null });
     else if (made.error) failures.push(made.error);
   }
@@ -99,9 +101,7 @@ export async function seedDecisions(issueKey) {
       created: 0,
       projectKey,
       issues: [],
-      reason: typeId
-        ? failures[0] ?? 'the app could not create an issue in this project'
-        : `project ${projectKey} offers the app no issue type it can create`
+      reason: type.id ? failures[0] ?? 'the app could not create an issue in this project' : type.reason
     };
   }
 
@@ -110,7 +110,9 @@ export async function seedDecisions(issueKey) {
   for (const decision of demoDecisions(projectKey, year)) {
     // Evidence has to open the words that decided it, so the seed posts the decision as a
     // real comment and links to that comment. A quote nobody can find is a rumour.
-    const host = demo[created % Math.max(demo.length, 1)];
+    // Offset by one so a decision never cites the very issue that contradicts it: a citation
+    // that stays on the page proves nothing.
+    const host = demo[(created + 1) % Math.max(demo.length, 1)];
     const text = `Decision: ${decision.statement}${decision.rationale ? ` ${decision.rationale}` : ''}`;
     const commentId = host ? await addComment(host.key, text) : null;
     const url = host

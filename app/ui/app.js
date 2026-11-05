@@ -1,10 +1,20 @@
-import { invoke, view } from '@forge/bridge';
+import { invoke, router, view } from '@forge/bridge';
 import { renderPanel, renderLedger, fault } from './render.js';
 
 const root = document.getElementById('app');
 let selected = null;
 let paint = null;
 let demo = [];
+
+// Inside Forge the app runs in a sandboxed iframe, so target=_blank is swallowed and the
+// evidence link does nothing. Hand the navigation to the host product instead.
+document.addEventListener('click', (event) => {
+  const link = event.target.closest?.('a.source');
+  if (!link) return;
+  event.preventDefault();
+  const { pathname, search } = new URL(link.href, window.location.origin);
+  router.navigate(`${pathname}${search}`);
+});
 
 // Seeding files twelve decisions and creates the issues to test them with, so whatever is
 // on screen is stale the moment it returns.

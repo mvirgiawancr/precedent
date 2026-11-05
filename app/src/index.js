@@ -1,4 +1,4 @@
-import Resolver from '@forge/resolver';
+import { makeResolver } from '@forge/resolver';
 import api, { route } from '@forge/api';
 import { compare, rank, nextId, isDecisionText, parseDecision } from './lib/decisions.js';
 import * as store from './store.js';
@@ -177,40 +177,41 @@ export async function listDecisionChain(payload) {
 
 // ---------------------------------------------------------------- UI resolvers
 
-const resolver = new Resolver();
+// makeResolver, not `new Resolver()`: the default export of this CJS package is not a
+// constructor once Forge's bundler has interop-wrapped it ("out_namespaceObject is not a
+// constructor" in the global page). The named factory is immune to that.
+export const resolver = makeResolver({
+  panel: async ({ context }) => {
+    const issueKey = context?.extension?.issue?.key;
+    if (!issueKey) return { issueKey: null, hits: [], seeded: await store.isSeeded() };
+    const facts = await issueFacts(issueKey);
+    return { issueKey, hits: rank(await store.all(), facts), seeded: await store.isSeeded() };
+  },
 
-resolver.define('panel', async ({ context }) => {
-  const issueKey = context?.extension?.issue?.key;
-  if (!issueKey) return { issueKey: null, hits: [], seeded: await store.isSeeded() };
-  const facts = await issueFacts(issueKey);
-  return { issueKey, hits: rank(await store.all(), facts), seeded: await store.isSeeded() };
-});
+  ledger: async () => {
+    const decisions = await store.all();
+    return {
+      decisions: decisions.sort((a, b) => (a.id < b.id ? 1 : -1)),
+      seeded: await store.isSeeded()
+    };
+  },
 
-resolver.define('ledger', async () => {
-  const decisions = await store.all();
-  return {
-    decisions: decisions.sort((a, b) => (a.id < b.id ? 1 : -1)),
-    seeded: await store.isSeeded()
-  };
-});
+  capture: async ({ context }) => {
+    const issueKey = context?.extension?.issue?.key;
+    if (!issueKey) return { issueKey: null, captured: [], scanned: 0 };
+    return captureFromComments(issueKey);
+  },
 
-resolver.define('capture', async ({ context }) => {
-  const issueKey = context?.extension?.issue?.key;
-  if (!issueKey) return { issueKey: null, captured: [], scanned: 0 };
-  const result = await captureFromComments(issueKey);
-  return result;
-});
-
-resolver.define('seed', async ({ context }) => {
-  // Seeding twice would file the same decisions again and create a second batch of issues.
-  if (await store.isSeeded()) {
-    return { created: (await store.all()).length, already: true, issues: [] };
+  seed: async ({ context }) => {
+    // Seeding twice would file the same decisions again and create a second batch of issues.
+    if (await store.isSeeded()) {
+      return { created: (await store.all()).length, already: true, issues: [] };
+    }
+    const created = await seedDecisions(context?.extension?.issue?.key);
+    // Marking a failed seed would hide the button and leave the judge with an empty ledger.
+    if (created.created > 0) await store.markSeeded();
+    return created;
   }
-  const created = await seedDecisions(context?.extension?.issue?.key);
-  // Marking a failed seed would hide the button and leave the judge with an empty ledger.
-  if (created.created > 0) await store.markSeeded();
-  return created;
 });
 
-export { resolver };
 export { compare };

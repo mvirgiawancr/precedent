@@ -6,7 +6,18 @@ modules:
         function: resolver
       icon: resource:main;icon.svg
       title: Precedent
+  # The glance is what appears in the work item sidebar with no setup. Jira only renders an
+  # issue panel once it has been added to the project's work item layout, so the glance is the
+  # surface a judge sees first; both run the same resolver and the same resource.
+  jira:issueGlance:
+    - key: precedent-glance
+      resource: main
+      resolver:
+        function: resolver
+      icon: resource:main;icon.svg
+      title: Precedent
       label: Precedent
+
   jira:globalPage:
     - key: precedent-ledger
       resource: main

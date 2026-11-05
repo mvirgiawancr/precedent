@@ -1,0 +1,150 @@
+modules:
+  jira:issuePanel:
+    - key: precedent-panel
+      resource: main
+      resolver:
+        function: resolver
+      icon: resource:main;icon.svg
+      title: Precedent
+  # The glance is what appears in the work item sidebar with no setup. Jira only renders an
+  # issue panel once it has been added to the project's work item layout, so the glance is the
+  # surface a judge sees first; both run the same resolver and the same resource.
+  jira:issueGlance:
+    - key: precedent-glance
+      resource: main
+      resolver:
+        function: resolver
+      icon: resource:main;icon.svg
+      title: Precedent
+      label: Precedent
+
+  jira:globalPage:
+    - key: precedent-ledger
+      resource: main
+      resolver:
+        function: resolver
+      title: Precedent ledger
+      label: Precedent
+
+  rovo:agent:
+    - key: precedent-agent
+      name: Precedent
+      description: Answers with the decisions already recorded for a piece of work,
+        and cites them.
+      prompt: |
+        You help people avoid re-deciding what was already decided. When asked about a
+        Jira issue or a piece of work, call check-precedent before answering. Always
+        quote the evidence and give the source URL. Never invent a decision.
+      conversationStarters:
+        - Check precedent for AUTH-142
+        - Has this already been decided?
+      actions:
+        - check-precedent
+        - find-decision
+
+  rovo:mcp:
+    - key: precedent-mcp
+      name: Precedent Ledger
+      tools:
+        - check-precedent
+        - find-decision
+        - record-decision
+        - list-decision-chain
+
+  action:
+    - key: check-precedent
+      name: Check precedent
+      function: checkPrecedent
+      actionVerb: GET
+      description: >-
+        Check whether a Jira issue contradicts a recorded decision. Call before
+        changing behaviour an existing decision may cover. Returns the decision,
+        its state, evidence quote and source URL for citation.
+      inputs:
+        issueKey:
+          title: Issue key
+          type: string
+          required: true
+          description: Jira issue key, for example AUTH-142
+    - key: find-decision
+      name: Find decision
+      function: findDecision
+      actionVerb: GET
+      description: >-
+        Search the decision ledger by free text or project key. Returns matching
+        decisions with their state, rationale and source URL.
+      inputs:
+        query:
+          title: Query
+          type: string
+          required: true
+          description: Words to look for, or a project key
+    - key: record-decision
+      name: Record decision
+      function: recordDecision
+      actionVerb: CREATE
+      description: >-
+        Record a decision in the ledger so later work can cite it. Requires the
+        statement and a source URL as evidence.
+      inputs:
+        statement:
+          title: Statement
+          type: string
+          required: true
+          description: The decision, as one imperative sentence
+        rationale:
+          title: Rationale
+          type: string
+          required: false
+          description: Why it was decided, in the decider's words
+        projectKey:
+          title: Project key
+          type: string
+          required: true
+          description: Jira project the decision applies to
+        evidenceUrl:
+          title: Evidence URL
+          type: string
+          required: true
+          description: Link to the comment or page that decided it
+    - key: list-decision-chain
+      name: List decision chain
+      function: listDecisionChain
+      actionVerb: GET
+      description: >-
+        Return the full supersede chain for one decision, oldest to newest, so a
+        decision that was replaced is not cited as current.
+      inputs:
+        decisionId:
+          title: Decision id
+          type: string
+          required: true
+          description: Decision id, for example AUTH-2026-03
+
+  function:
+    - key: resolver
+      handler: index.resolver
+    - key: checkPrecedent
+      handler: index.checkPrecedent
+    - key: findDecision
+      handler: index.findDecision
+    - key: recordDecision
+      handler: index.recordDecision
+    - key: listDecisionChain
+      handler: index.listDecisionChain
+
+resources:
+  - key: main
+    path: static
+
+app:
+  runtime:
+    name: nodejs24.x
+    memoryMB: 256
+    architecture: arm64
+  id: ari:cloud:ecosystem::app/1283e715-3a68-4efe-b60e-1d54479b7a4b
+permissions:
+  scopes:
+    - read:jira-work
+    - write:jira-work
+    - storage:app
