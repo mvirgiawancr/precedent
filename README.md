@@ -9,6 +9,12 @@ Built for **Codegeist 2026**, category *Apps for Specialized Industries*, with t
 
 ---
 
+| In the work item | The ledger |
+| --- | --- |
+| ![Precedent panel on KAN-14](docs/panel.png) | ![The ledger, 12 decisions on file](docs/ledger.png) |
+
+Both screenshots are from [precedent.atlassian.net](https://precedent.atlassian.net/browse/KAN-14).
+
 ## The problem, in one paragraph
 
 A firm makes thousands of decisions and keeps none of them. They live in a comment on a
