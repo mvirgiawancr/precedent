@@ -1,0 +1,43 @@
+modules:
+  rovo:agent:
+    - key: precedent-agent
+      name: Precedent
+      description: Answers with the decisions already recorded for a piece of work, and cites them.
+      prompt: |
+        You help people avoid re-deciding what was already decided. When asked about
+        a Jira issue or a piece of work, call check-precedent before answering.
+        Always quote the evidence and give the source URL. Never invent a decision.
+      conversationStarters:
+        - Check precedent for AUTH-142
+        - Has this already been decided?
+      actions:
+        - check-precedent
+  rovo:mcp:
+    - key: precedent-mcp
+      name: Precedent Ledger
+      tools:
+        - check-precedent
+  action:
+    - key: check-precedent
+      name: Check precedent
+      function: resolver
+      actionVerb: GET
+      description: >-
+        Check whether a Jira issue contradicts a recorded decision. Call before
+        changing behaviour an existing decision may cover. Returns the decision,
+        its state, evidence quote and source URL for citation.
+      inputs:
+        issueKey:
+          title: Issue key
+          type: string
+          required: true
+          description: Jira issue key, for example AUTH-142
+  function:
+    - key: resolver
+      handler: index.checkPrecedent
+app:
+  runtime:
+    name: nodejs24.x
+    memoryMB: 256
+    architecture: arm64
+  id: ari:cloud:ecosystem::app/020d5c39-427d-4917-9595-ebc558aebe58

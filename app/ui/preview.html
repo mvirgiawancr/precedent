@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Precedent preview</title>
+    <meta name="description" content="Local preview of the Precedent issue panel and ledger page, with fake decisions." />
+    <link rel="stylesheet" href="../static/styles.css" />
+    <style>
+      body { padding: 0; }
+      .stage { display: grid; gap: 0; grid-template-columns: minmax(0, 380px) minmax(0, 1fr); min-height: 100vh; }
+      .panel-stage { border-right: 1px solid var(--rule); padding: 1.1rem; }
+      .page-stage { padding: 1.6rem 2rem; }
+      @media (max-width: 820px) { .stage { grid-template-columns: minmax(0, 1fr); } .panel-stage { border-right: 0; border-bottom: 1px solid var(--rule); } }
+    </style>
+  </head>
+  <body>
+    <div class="stage">
+      <div class="panel-stage" id="panel"></div>
+      <div class="page-stage" id="page"></div>
+    </div>
+    <script type="module">
+      import { renderPanel, renderLedger } from './render.js';
+
+      const year = new Date().getFullYear();
+      const url = 'https://one-atlas-xyiw.atlassian.net/browse/AUTH-88';
+
+      const decisions = [
+        { id: `OIDC-${year}-01`, statement: 'All new services authenticate with OIDC through the internal IdP.', rationale: 'Shared API keys leaked twice and have no rotation story.', state: 'binding', decidedAt: `${year}-01-12`, decidedBy: 'Rina', scope: { projectKeys: ['AUTH'], components: [], keywords: ['auth', 'token', 'sso'] }, evidence: { url, quote: 'Decision: we go OIDC via the internal IdP for every new service. Shared keys are done.' } },
+        { id: `SESSION-${year}-02`, statement: 'Session lifetime is 8 hours and refreshes on activity only.', rationale: 'Longer sessions kept support tickets down without measurable risk.', state: 'superseded', supersededBy: `OIDC-${year}-01`, decidedAt: `${year}-02-12`, decidedBy: 'demo', scope: { projectKeys: ['AUTH'], components: [], keywords: ['session'] }, evidence: { url, quote: 'Decision: 8 hour sessions, refresh only on activity.' } },
+        { id: `SCHEMA-${year}-03`, statement: 'Each service owns its schema; no cross-service joins in production.', rationale: 'One schema caused two outages during peak migration.', state: 'binding', decidedAt: `${year}-03-12`, decidedBy: 'demo', scope: { projectKeys: ['AUTH'], components: [], keywords: ['database'] }, evidence: { url, quote: 'Decision: each service owns its schema.' } },
+        { id: `PII-${year}-04`, statement: 'Customer PII never leaves the primary region.', rationale: 'Contractual commitment to two enterprise clients.', state: 'binding', decidedAt: `${year}-04-12`, decidedBy: 'demo', scope: { projectKeys: ['AUTH'], components: [], keywords: ['pii'] }, evidence: { url, quote: 'Decision: PII stays in the primary region.' } }
+      ];
+
+      const hits = [
+        { verdict: 'contradicts', reason: 'shares 3 term(s) [auth, token, shared] with OIDC-' + year + '-01 and proposes a change', decision: decisions[0] },
+        { verdict: 'related', reason: 'shares 1 term(s) [schema] with SCHEMA-' + year + '-03', decision: decisions[2] }
+      ];
+
+      // what the seed resolver returns, so the post-seed state can be checked without Jira
+      const seedResult = {
+        created: 12,
+        issues: [
+          { key: 'AUTH-201', summary: 'Replace OIDC with shared API keys for the gateway', url },
+          { key: 'AUTH-202', summary: 'Drop the 8 hour session limit and keep tokens forever', url },
+          { key: 'AUTH-203', summary: 'Switch customer PII storage to the US region', url }
+        ]
+      };
+
+      // Mimics app.js: seeding repaints, because twelve new decisions make the view stale.
+      let demo = [];
+      let seeded = false;
+      const stage = document.getElementById('panel');
+      const paint = () =>
+        renderPanel(stage, { issueKey: 'AUTH-142', hits: seeded ? hits : [], seeded, demo }, seed, capture);
+
+      async function seed() {
+        demo = seedResult.issues;
+        seeded = true;
+        paint();
+        return seedResult;
+      }
+
+      // empty on purpose: the note for "no new decision" is the harder state to get right
+      async function capture() {
+        return { captured: [], scanned: 4 };
+      }
+
+      paint();
+      renderLedger(document.getElementById('page'), { decisions, seeded: true }, { selected: decisions[0].id, onSelect: () => {} });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,688 @@
+/* Hallmark · shape: the file room · genre: records · theme: custom · job: try · idea: "a firm's decisions read as a case file, and the page is the room they are kept in" · vibe: cold, quiet, official, exact
+ * paper: oklch(96.6% 0.004 250) · accent: oklch(55% 0.205 25) · display: Antonio · body: Archivo · hero: full-bleed reading room, grayscale, content low and left · nav: flat over the photograph · footer: night band with the credit line · imagery: one library photograph, the product's own screens · signature: the accent rule that marks a contradiction
+ * axes: cold near-white/condensed/heavy asphalt · posture: Poster · contrast: pass · fold: pass · v2.0.0 */
+/* Hallmark · pre-emit critique: P_ H_ E_ S_ R_ V_ · weakest: S, three text sections in a row could flatten; answered by making the contradiction a full-bleed typographic band and the ledger a native-width screenshot, so no two sections share a skeleton */
+
+@import url("./tokens.css");
+@import url("./base.css");
+
+.skip {
+  position: absolute;
+  left: var(--space-md);
+  top: -100px;
+  z-index: var(--z-modal);
+  background: var(--color-ink);
+  color: var(--color-paper);
+  padding: var(--space-sm) var(--space-md);
+  text-decoration: none;
+}
+.skip:focus-visible { top: var(--space-md); }
+
+/* ------------------------------------------------------------------ nav */
+
+.nav {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: 0;
+  z-index: var(--z-sticky-nav);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-lg);
+  padding-block: var(--space-lg);
+}
+
+.nav-mark {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--text-lg);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1;
+  color: var(--color-night-ink);
+  text-decoration: none;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+}
+
+.nav-link {
+  font-family: var(--font-outlier);
+  font-size: var(--text-xs);
+  color: var(--color-night-ink);
+  text-decoration: none;
+  opacity: 0.78;
+  transition: opacity var(--dur-micro) var(--ease-out);
+}
+.nav-link:hover { opacity: 1; }
+
+.nav-cta {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--color-night-ink);
+  text-decoration: none;
+  border: 1px solid var(--color-night-rule);
+  border-radius: var(--radius-card);
+  padding: var(--space-xs) var(--space-md);
+  transition: background-color var(--dur-micro) var(--ease-out), border-color var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
+}
+.nav-cta:hover {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-accent-ink);
+}
+
+/* ------------------------------------------------------------------ hero */
+
+.hero {
+  position: relative;
+  display: grid;
+  align-content: end;
+  margin: 0;
+  min-height: 620px;
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--color-night);
+  color: var(--color-night-ink);
+  isolation: isolate;
+}
+
+.hero-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 44%;
+  filter: grayscale(1) contrast(1.06) brightness(0.82);
+  z-index: -2;
+}
+
+.hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(180deg, color-mix(in oklab, var(--color-night) 88%, transparent) 0%, color-mix(in oklab, var(--color-night) 42%, transparent) 24%, color-mix(in oklab, var(--color-night) 18%, transparent) 46%, color-mix(in oklab, var(--color-night) 92%, transparent) 88%, var(--color-night) 100%),
+    linear-gradient(90deg, color-mix(in oklab, var(--color-night) 72%, transparent) 0%, transparent 62%);
+}
+
+.hero-inner {
+  padding-block-end: var(--space-2xl);
+  display: grid;
+  gap: var(--space-lg);
+  justify-items: start;
+}
+
+.kicker {
+  font-size: var(--text-sm);
+  color: var(--color-night-muted);
+  letter-spacing: 0.01em;
+}
+
+.hero h1 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--text-display);
+  line-height: 1;
+  letter-spacing: var(--tracking-display);
+  text-transform: uppercase;
+  color: var(--color-night-ink);
+  max-width: 18ch;
+}
+
+.hero-lede {
+  max-width: 46ch;
+  font-size: var(--text-lead);
+  line-height: 1.5;
+  color: color-mix(in oklab, var(--color-night-ink) 84%, var(--color-night));
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  margin-block-start: var(--space-xs);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-sm) var(--space-lg);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  line-height: 1.4;
+  text-decoration: none;
+  border: 1px solid transparent;
+  border-radius: var(--radius-card);
+  transition: background-color var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out), border-color var(--dur-micro) var(--ease-out);
+}
+
+.btn--solid {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  border-color: var(--color-paper);
+}
+.btn--solid:hover {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-accent-ink);
+}
+
+.btn--ghost {
+  color: var(--color-night-ink);
+  border-color: var(--color-night-rule);
+}
+.btn--ghost:hover {
+  border-color: var(--color-night-ink);
+  background: color-mix(in oklab, var(--color-night-ink) 8%, transparent);
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.nav-cta:active,
+.nav-link:active,
+.foot-links a:active {
+  opacity: 0.72;
+}
+
+.hero :focus-visible,
+.night :focus-visible,
+.foot :focus-visible {
+  outline-color: var(--color-night-ink);
+}
+
+/* ------------------------------------------------------------------ sections */
+
+.section {
+  padding-block: var(--section-gap);
+}
+
+.night {
+  background: var(--color-night);
+  color: var(--color-night-ink);
+}
+
+.section h2 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--text-section);
+  line-height: 1.02;
+  letter-spacing: -0.005em;
+  color: var(--color-ink);
+  max-width: 24ch;
+}
+.night h2 { color: var(--color-night-ink); }
+
+.section h2.statement {
+  display: grid;
+  gap: var(--space-md);
+  max-width: none;
+  border-block-start: 1px solid var(--color-rule);
+  padding-block-start: var(--space-xl);
+  font-size: clamp(2.5rem, 4.4vw + 1rem, 5.5rem);
+  line-height: 1.04;
+}
+
+.statement span:last-child {
+  color: var(--color-muted);
+  text-align: right;
+}
+
+@media (min-width: 60rem) {
+  .statement {
+    gap: var(--space-lg);
+  }
+}
+
+.split {
+  display: grid;
+  gap: var(--space-2xl);
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+}
+
+.col {
+  display: grid;
+  gap: var(--space-lg);
+  align-content: start;
+  min-width: 0;
+}
+
+.col > h2 {
+  margin-block-end: var(--space-xs);
+}
+
+@media (min-width: 60rem) {
+  .split {
+    grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+    gap: var(--space-4xl);
+  }
+  .split--wide-right { grid-template-columns: minmax(0, 0.78fr) minmax(0, 1.22fr); }
+  .split--reverse > :first-child { order: 2; }
+}
+
+.prose {
+  display: grid;
+  gap: var(--space-lg);
+  max-width: 58ch;
+}
+
+.prose p {
+  font-size: var(--text-md);
+  line-height: 1.65;
+  color: var(--color-ink-2);
+}
+.night .prose p { color: color-mix(in oklab, var(--color-night-ink) 78%, var(--color-night)); }
+
+.prose p strong {
+  font-weight: 600;
+  color: var(--color-ink);
+}
+.night .prose p strong { color: var(--color-night-ink); }
+
+.lede {
+  font-size: var(--text-lead);
+  line-height: 1.5;
+  color: var(--color-ink-2);
+}
+.night .lede { color: color-mix(in oklab, var(--color-night-ink) 82%, var(--color-night)); }
+
+/* ------------------------------------------------------------------ the catch */
+
+.case {
+  border-block-start: 1px solid var(--color-accent);
+  padding-block-start: var(--space-xl);
+  display: grid;
+  gap: var(--space-md);
+  max-width: 60rem;
+}
+
+.case-issue {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-sm);
+  font-size: var(--text-md);
+  color: var(--color-night-muted);
+}
+
+.case-key {
+  font-family: var(--font-outlier);
+  font-size: var(--text-sm);
+  color: var(--color-night-ink);
+}
+
+.case-flag {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-accent-lift);
+}
+
+.case blockquote {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(2.25rem, 3.4vw + 1rem, 4.25rem);
+  line-height: 1.02;
+  letter-spacing: -0.005em;
+  color: var(--color-night-ink);
+  text-wrap: balance;
+}
+
+.case-meta {
+  font-family: var(--font-outlier);
+  font-size: var(--text-xs);
+  line-height: 1.7;
+  color: var(--color-night-muted);
+}
+
+.case-foot {
+  margin-block-start: var(--space-xl);
+  font-size: var(--text-md);
+  color: var(--color-night-muted);
+  max-width: 66ch;
+  line-height: 1.6;
+}
+
+/* ------------------------------------------------------------------ screenshots */
+
+.shot {
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-card);
+  background: var(--color-paper);
+  overflow: hidden;
+}
+
+.shot img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.shot--panel {
+  width: 100%;
+  max-width: 380px;
+  aspect-ratio: 380 / 560;
+}
+.shot--panel img {
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+}
+
+.shot--ledger {
+  width: 100%;
+  max-width: 560px;
+}
+
+.caption {
+  margin-block-start: var(--space-md);
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+  max-width: 46ch;
+}
+
+.notes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-lg);
+}
+
+.notes li {
+  border-block-start: 1px solid var(--color-rule);
+  padding-block-start: var(--space-sm);
+  font-size: var(--text-md);
+  line-height: 1.55;
+  color: var(--color-ink-2);
+}
+
+.notes b {
+  display: block;
+  font-weight: 600;
+  color: var(--color-ink);
+  margin-block-end: var(--space-2xs);
+}
+
+/* ------------------------------------------------------------------ transcript */
+
+.transcript {
+  border: 1px solid var(--color-night-rule);
+  border-radius: var(--radius-card);
+  background: var(--color-night-2);
+  overflow: hidden;
+  min-height: 300px;
+  max-width: 46rem;
+}
+
+.transcript-head {
+  display: flex;
+  gap: var(--space-2xs);
+  padding: var(--space-sm) var(--space-lg);
+  border-block-end: 1px solid var(--color-night-rule);
+}
+
+.transcript-head i {
+  width: 8px;
+  height: 8px;
+  margin-inline-end: 2px;
+  border-radius: var(--radius-pill);
+  background: var(--color-night-rule);
+}
+
+.transcript-body {
+  display: grid;
+  gap: var(--space-md);
+  padding: var(--space-xl);
+}
+
+.say-you {
+  font-size: var(--text-sm);
+  color: var(--color-night-muted);
+}
+
+.say-you::before {
+  content: "You";
+  font-family: var(--font-outlier);
+  font-size: var(--text-xs);
+  color: var(--color-night-ink);
+  margin-inline-end: var(--space-sm);
+}
+
+.reply {
+  margin: 0;
+  font-family: var(--font-outlier);
+  font-size: var(--text-xs);
+  line-height: 1.75;
+  color: color-mix(in oklab, var(--color-night-ink) 88%, var(--color-night));
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
+
+.reply b {
+  color: var(--color-accent-lift);
+  font-weight: 500;
+}
+
+/* ------------------------------------------------------------------ spec */
+
+.spec {
+  margin: 0;
+  margin-block-start: var(--space-md);
+  display: grid;
+  gap: 0;
+}
+
+.spec > div {
+  display: grid;
+  gap: var(--space-2xs);
+  padding-block: var(--space-md);
+  border-block-start: 1px solid var(--color-rule);
+}
+
+@media (min-width: 40rem) {
+  .spec > div {
+    grid-template-columns: minmax(0, 12rem) minmax(0, 1fr);
+    gap: var(--space-lg);
+    align-items: baseline;
+  }
+}
+
+.spec dt {
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+}
+
+.spec dd {
+  margin: 0;
+  font-family: var(--font-outlier);
+  font-size: var(--text-xs);
+  line-height: 1.7;
+  color: var(--color-ink);
+}
+
+/* ------------------------------------------------------------------ footer */
+
+.foot {
+  background: var(--color-night);
+  color: var(--color-night-ink);
+  padding-block: var(--space-3xl) var(--space-xl);
+}
+
+.foot-inner {
+  display: grid;
+  gap: var(--space-xl);
+}
+
+.foot-mark {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--text-2xl);
+  line-height: 1;
+}
+
+.foot-line {
+  font-size: var(--text-sm);
+  color: var(--color-night-muted);
+  max-width: 46ch;
+  line-height: 1.6;
+}
+
+.foot-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-lg);
+  font-size: var(--text-sm);
+  border-block-start: 1px solid var(--color-night-rule);
+  padding-block-start: var(--space-md);
+}
+
+.foot-links a {
+  color: var(--color-night-ink);
+  text-decoration: none;
+  border-block-end: 1px solid var(--color-night-rule);
+  padding-block-end: var(--space-3xs);
+  transition: border-color var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
+}
+.foot-links a:hover {
+  border-color: var(--color-accent-lift);
+  color: var(--color-accent-lift);
+}
+
+.credits {
+  font-size: var(--text-xs);
+  color: var(--color-night-muted);
+  font-family: var(--font-outlier);
+  line-height: 1.7;
+}
+
+.credits a {
+  color: var(--color-night-muted);
+  text-decoration-color: var(--color-night-rule);
+}
+
+@media (max-width: 40rem) {
+  .nav-links { gap: var(--space-md); }
+  .nav-link { display: none; }
+  .hero { height: 100dvh; }
+  .case { padding-block-start: var(--space-lg); }
+  .statement span:last-child { text-align: left; }
+  .shot--ledger { overflow-x: auto; }
+  .shot--ledger img { min-width: 545px; }
+  .transcript { padding: var(--space-lg); }
+}
+
+/* ------------------------------------------------------------------ motion */
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 26px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes settle {
+  from {
+    transform: scale(1.07);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+.hero-art {
+  animation: settle 1800ms var(--ease-out) both;
+}
+
+.nav {
+  animation: rise 700ms var(--ease-out) 80ms both;
+}
+
+.hero h1 {
+  animation: rise 900ms var(--ease-out) 160ms both;
+}
+
+.hero-lede {
+  animation: rise 900ms var(--ease-out) 300ms both;
+}
+
+.actions {
+  animation: rise 900ms var(--ease-out) 420ms both;
+}
+
+/* scroll reveals: only when the observer exists, so no content hides without JS */
+.js .reveal > * {
+  opacity: 0;
+  transform: translate3d(0, 18px, 0);
+  transition:
+    opacity var(--dur-long) var(--ease-out),
+    transform var(--dur-long) var(--ease-out);
+}
+
+.js .reveal.in > * {
+  opacity: 1;
+  transform: none;
+}
+
+.js .reveal.in > *:nth-child(2) { transition-delay: 90ms; }
+.js .reveal.in > *:nth-child(3) { transition-delay: 180ms; }
+.js .reveal.in > *:nth-child(4) { transition-delay: 270ms; }
+.js .reveal.in > *:nth-child(5) { transition-delay: 360ms; }
+
+/* the red rule draws itself when the contradiction scrolls in */
+.js .case {
+  border-block-start-color: transparent;
+  position: relative;
+}
+
+.js .case::before {
+  content: "";
+  position: absolute;
+  inset-block-start: -1px;
+  inset-inline-start: 0;
+  height: 1px;
+  width: 100%;
+  background: var(--color-accent);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 720ms var(--ease-out);
+}
+
+.js .case.in::before {
+  transform: scaleX(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-art,
+  .nav,
+  .hero h1,
+  .hero-lede,
+  .actions {
+    animation: none;
+  }
+
+  .js .reveal > * {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .js .case::before {
+    transform: none;
+    transition: none;
+  }
+}

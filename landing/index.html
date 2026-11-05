@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Precedent · the decision ledger for Jira</title>
+    <meta
+      name="description"
+      content="Precedent records the decisions a firm makes in Jira, quotes the comment that decided each one, and flags the next issue that contradicts it."
+    />
+    <meta name="theme-color" content="#0c0e0f" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Antonio:wght@500;600;700&family=Archivo:wght@400;500;600&family=Azeret+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./landing.css" />
+    <script>
+      // Motion is opt-in: no observer, no hidden content.
+      if ('IntersectionObserver' in window) document.documentElement.classList.add('js');
+    </script>
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+
+    <figure class="hero">
+      <img
+        class="hero-art"
+        src="./img/hero.jpg"
+        width="1920"
+        height="1275"
+        alt=""
+        fetchpriority="high"
+        decoding="async"
+      />
+
+      <nav class="nav container" aria-label="Primary">
+        <a class="nav-mark" href="#main">Precedent</a>
+        <div class="nav-links">
+          <a class="nav-link" href="#how">How it works</a>
+          <a class="nav-link" href="#agent">In Rovo</a>
+          <a class="nav-link" href="#built">Under the hood</a>
+          <a class="nav-cta" href="https://one-atlas-xyiw.atlassian.net" target="_blank" rel="noreferrer">Open the demo</a>
+        </div>
+      </nav>
+
+      <div class="hero-inner container">
+        <h1>Decided once.<br />Cited forever.</h1>
+        <p class="hero-lede">
+          Precedent keeps the decisions a firm makes in Jira, quotes the comment that decided each
+          one, and flags the next issue that contradicts it.
+        </p>
+        <div class="actions">
+          <a class="btn btn--solid" href="https://one-atlas-xyiw.atlassian.net" target="_blank" rel="noreferrer">Open the demo</a>
+          <a class="btn btn--ghost" href="#how">See how it works</a>
+        </div>
+      </div>
+    </figure>
+
+    <main id="main">
+      <section class="section">
+        <div class="container">
+          <h2 class="statement reveal">
+            <span>Firms do not lose knowledge.</span>
+            <span>They lose the reason.</span>
+          </h2>
+        </div>
+      </section>
+
+      <section class="section night">
+        <div class="container">
+          <div class="case reveal">
+            <p class="case-issue">
+              <span class="case-key">AUTH-142</span>
+              <span>Replace session tokens with shared API keys</span>
+            </p>
+            <p class="case-flag">Contradicts a binding decision</p>
+            <blockquote>All new services authenticate with OIDC through the internal IdP.</blockquote>
+            <p class="case-meta">
+              OIDC-2026-01<br />
+              Rina, 11 Mar 2026<br />
+              comment 10021 on AUTH-88
+            </p>
+          </div>
+          <p class="case-foot">
+            Printed before the branch is cut.
+          </p>
+        </div>
+      </section>
+
+      <section class="section" id="how">
+        <div class="container split reveal">
+          <div>
+            <div class="shot shot--panel">
+              <img
+                src="./img/panel.png"
+                width="380"
+                height="900"
+                decoding="async"
+                alt="The Precedent panel on AUTH-142: a red verdict reading Contradicts, the decision it breaks, and a second related decision with its evidence quote and source link."
+              />
+            </div>
+          </div>
+          <div class="col">
+            <h2>A verdict where the work happens.</h2>
+            <ul class="notes">
+              <li>
+                <b>Binding only.</b>
+                A superseded decision is never cited as current.
+              </li>
+              <li>
+                <b>Quote and link.</b>
+                The reader checks the sentence in place, in one click.
+              </li>
+              <li>
+                <b>Quiet when nothing applies.</b>
+                A panel that always speaks gets closed.
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="section night" id="agent">
+        <div class="container split split--wide-right reveal">
+          <div>
+            <h2>The agent answers with the record.</h2>
+          </div>
+          <div class="transcript">
+            <div class="transcript-head" aria-hidden="true"><i></i><i></i><i></i></div>
+            <div class="transcript-body">
+              <p class="say-you">Check precedent for AUTH-142</p>
+              <p class="reply"><b>CONTRADICTS PRECEDENT:</b> shares auth, token and shared with OIDC-2026-01
+- OIDC-2026-01 [binding] All new services authenticate with OIDC through the internal IdP.
+  decided 2026-03-11 by Rina</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container split reveal">
+          <div class="col">
+            <h2>A case file, not a wiki.</h2>
+            <p class="lede">
+              Every record carries its id, decider, date, quote and source link. Replacements stay
+              visible as a chain.
+            </p>
+          </div>
+          <div>
+            <div class="shot shot--ledger">
+              <img
+                src="./img/ledger.png"
+                width="552"
+                height="663"
+                decoding="async"
+                alt="The Precedent ledger page: an index of decisions on the left with their case numbers and states, and the selected record on the right with its rationale, evidence quote and source link."
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="built">
+        <div class="container split reveal">
+          <div>
+            <h2>Deterministic on purpose.</h2>
+          </div>
+          <div class="prose">
+            <p>
+              No model runs inside the app. Matching is keyword and scope comparison you can read in
+              the source, so every verdict is reproducible.
+            </p>
+            <p>Reasoning belongs to the agent. Bookkeeping belongs here.</p>
+            <dl class="spec">
+              <div>
+                <dt>Platform</dt>
+                <dd>Forge, Jira Cloud, nodejs24.x runtime</dd>
+              </div>
+              <div>
+                <dt>Modules</dt>
+                <dd>jira:issuePanel, jira:globalPage, rovo:agent, rovo:mcp</dd>
+              </div>
+              <div>
+                <dt>Agent tools</dt>
+                <dd>check_precedent, find_decision, record_decision, list_decision_chain</dd>
+              </div>
+              <div>
+                <dt>Scopes</dt>
+                <dd>read:jira-work, storage:app</dd>
+              </div>
+            </dl>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="foot">
+      <div class="container foot-inner reveal">
+        <p class="foot-mark">Precedent</p>
+        <p class="foot-line">
+          A Forge app for Jira Cloud. Built for Atlassian Codegeist 2026, Apps for Specialized
+          Industries, with an MCP bonus entry.
+        </p>
+        <div class="foot-links">
+          <a href="https://one-atlas-xyiw.atlassian.net" target="_blank" rel="noreferrer">Open the demo site</a>
+          <a href="#main">Back to top</a>
+        </div>
+        <p class="credits" data-credits>
+          Photograph:
+          <a href="https://commons.wikimedia.org/wiki/File:13-11-02-olb-by-RalfR-03.jpg">Ralf Roletschek</a>,
+          CC BY 3.0, via Wikimedia Commons.
+        </p>
+      </div>
+    </footer>
+
+    <script>
+      (() => {
+        const items = document.querySelectorAll('.reveal');
+        if (!items.length) return;
+        const io = new IntersectionObserver(
+          (entries) => {
+            for (const entry of entries) {
+              if (!entry.isIntersecting) continue;
+              entry.target.classList.add('in');
+              io.unobserve(entry.target);
+            }
+          },
+          { threshold: 0, rootMargin: '0px 0px -8% 0px' }
+        );
+        for (const el of items) io.observe(el);
+      })();
+    </script>
+  </body>
+</html>
