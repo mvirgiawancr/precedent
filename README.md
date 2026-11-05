@@ -58,13 +58,24 @@ deliberate non-goal, not a shortcut.
 
 ## Try it in five minutes
 
-You need a free Atlassian Cloud site and Node 18+. No card, no paid plan.
+**The fastest path — install from the link.** Site admins can install the production build
+without any tooling:
+
+```
+https://developer.atlassian.com/console/install/1283e715-3a68-4efe-b60e-1d54479b7a4b?signature=AYABeDvrfMrbH6j6bH4F8ysvGQsAAAADAAdhd3Mta21zAEthcm46YXdzOmttczp1cy13ZXN0LTI6NzA5NTg3ODM1MjQzOmtleS83MDVlZDY3MC1mNTdjLTQxYjUtOWY5Yi1lM2YyZGNjMTQ2ZTcAuAECAQB4CxqLTo9l4lqXuFjNim1xJM%2Bp%2F3TVP9xHS2BrU5DRRucBTPZ57mT2%2BeE1h1hG3pshsAAAAH4wfAYJKoZIhvcNAQcGoG8wbQIBADBoBgkqhkiG9w0BBwEwHgYJYIZIAWUDBAEuMBEEDGbFeAIHNeRpoDA9kgIBEIA7JI%2B7yhkbc%2BI2gw%2BSTBqOq%2Fvw2dmFUKHrjwE4cs8M2WbFQopX2FYBTvtlM4SrpMou4Rcc5bg4S1SW2N0AB2F3cy1rbXMAS2Fybjphd3M6a21zOmV1LXdlc3QtMTo3MDk1ODc4MzUyNDM6a2V5LzQ2MzBjZTZiLTAwYzMtNGRlMi04NzdiLTYyN2UyMDYwZTVjYwC4AQICAHi9bVMAkme4qVQX1fQHo6ePw3H40A7cGfz7yrmSfBWMXgGDx%2BHNQ91uTXjJzzmUifolAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMCj7OPx6ZVe5tX%2FlcAgEQgDu10weiFROn90nh5ytaSf4ura%2FGguuu2cSh8VZFiTDDDwRp3S79exuWPDzG9%2BRZP9MtIaO36W7x%2F02BQAAHYXdzLWttcwBLYXJuOmF3czprbXM6dXMtZWFzdC0xOjcwOTU4NzgzNTI0MzprZXkvNmMxMjBiYTAtNGNkNS00OTg1LWI4MmUtNDBhMDQ5NTJjYzU3ALgBAgIAeDYASx0XCjkny4iLV6vz%2BKtEGSGT6kdt0QRpkn6D%2FlVEAcELPCQ5D9k0LCR1ZtyLXZcAAAB%2BMHwGCSqGSIb3DQEHBqBvMG0CAQAwaAYJKoZIhvcNAQcBMB4GCWCGSAFlAwQBLjARBAwbpm10Y%2BEgDw3oqU8CARCAO0bPuXa2jfoVYmCs1CQdboAbFhPOH1scGUr5wmrHjicp3KUJqUvz9d4u1cJFE17LHuNPNdQ4n4dHEAARAgAAAAAMAAAQAAAAAAAAAAAAAAAAAPZZNsVEF3%2F5%2FAlu8zACvzn%2F%2F%2F%2F%2FAAAAAQAAAAAAAAAAAAAAAQAAADLh4KsnPkFHqHiOkF1NqYNYmtt11JH4JYgJhQBVhyhOprv9TmsXGW%2BUA%2F%2B1UlJnG9jeQ9HKMRP89lqkwWGdxhGAPqM%3D&product=jira
+```
+
+That link installs Precedent on your own Jira site. Nothing else is required: no admin
+configuration, no panel layout step, no API key.
+
+**Or build it from source.** You need a free Atlassian Cloud site and Node 18+. No card, no
+paid plan.
 
 ```bash
 npm i -g @forge/cli
 forge login                      # opens a browser; sign in yourself
 
-git clone https://github.com/<you>/precedent.git
+git clone https://github.com/mvirgiawancr/precedent.git
 cd precedent/app
 npm install
 npm run build
