@@ -245,6 +245,13 @@ export function renderLedger(root, { decisions, seeded }, options = {}) {
   );
 }
 
+// how a record entered the ledger, said in the record's own voice
+const CAPTURED = {
+  pattern: 'captured from a comment',
+  demo: 'demo record',
+  agent: 'recorded by an agent'
+};
+
 function detail(decision, all) {
   if (!decision) {
     return el(
@@ -261,7 +268,8 @@ function detail(decision, all) {
     el('h2', { text: decision.statement }),
     el('p', {
       class: 'meta',
-      text: `${decision.state} · decided ${decision.decidedAt} by ${decision.decidedBy}`
+      text: `${decision.state} · decided ${decision.decidedAt} by ${decision.decidedBy}` +
+        (CAPTURED[decision.capturedBy] ? ` · ${CAPTURED[decision.capturedBy]}` : '')
     }),
     decision.rationale
       ? el('section', {}, el('h3', { text: 'Why' }), el('p', { text: decision.rationale }))

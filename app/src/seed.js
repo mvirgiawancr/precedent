@@ -51,8 +51,27 @@ async function createIssue(projectKey, summary, typeId) {
       fields: { project: { key: projectKey }, summary, issuetype: { id: typeId } }
     })
   });
+  if (res.status !== 201) {
+    // A project can demand fields the seed does not know about; say so instead of going quiet.
+    return { error: `create issue failed (${res.status}): ${(await res.text()).slice(0, 300)}` };
+  }
+  return { key: (await res.json()).key ?? null };
+}
+
+/** Post the decision as a real comment, so the evidence link opens the words that decided it. */
+async function addComment(issueKey, text) {
+  const body = {
+    type: 'doc',
+    version: 1,
+    content: [{ type: 'paragraph', content: [{ type: 'text', text }] }]
+  };
+  const res = await api.asApp().requestJira(route`/rest/api/3/issue/${issueKey}/comment`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ body })
+  });
   if (res.status !== 201) return null;
-  return (await res.json()).key ?? null;
+  return (await res.json()).id ?? null;
 }
 
 // Written so the outcome is fixed: the first three run against a binding decision, the
@@ -67,23 +86,44 @@ export async function seedDecisions(issueKey) {
 
   const typeId = await issueTypeId(projectKey);
   const demo = [];
+  const failures = [];
   for (const summary of typeId ? DEMO_ISSUES : []) {
-    const key = await createIssue(projectKey, summary, typeId);
-    if (key) demo.push({ key, summary, url: base ? `${base}/browse/${key}` : null });
+    const made = await createIssue(projectKey, summary, typeId);
+    if (made.key) demo.push({ key: made.key, summary, url: base ? `${base}/browse/${made.key}` : null });
+    else if (made.error) failures.push(made.error);
+  }
+
+  // Without its own issues there is no demo, and a half-seeded ledger is worse than none.
+  if (demo.length === 0) {
+    return {
+      created: 0,
+      projectKey,
+      issues: [],
+      reason: typeId
+        ? failures[0] ?? 'the app could not create an issue in this project'
+        : `project ${projectKey} offers the app no issue type it can create`
+    };
   }
 
   const year = new Date().getFullYear();
   let created = 0;
   for (const decision of demoDecisions(projectKey, year)) {
-    // Evidence has to open, so it points at an issue this seed actually created.
-    const evidence = demo[created % Math.max(demo.length, 1)];
+    // Evidence has to open the words that decided it, so the seed posts the decision as a
+    // real comment and links to that comment. A quote nobody can find is a rumour.
+    const host = demo[created % Math.max(demo.length, 1)];
+    const text = `Decision: ${decision.statement}${decision.rationale ? ` ${decision.rationale}` : ''}`;
+    const commentId = host ? await addComment(host.key, text) : null;
+    const url = host
+      ? `${host.url}${commentId ? `?focusedCommentId=${commentId}` : ''}`
+      : null;
+
     await store.save({
       ...decision,
       evidence: {
-        kind: evidence ? 'jira-issue' : 'manual',
-        url: evidence?.url ?? null,
-        quote: `Decision: ${decision.statement}`,
-        issueKey: evidence?.key ?? null
+        kind: commentId ? 'jira-comment' : host ? 'jira-issue' : 'manual',
+        url,
+        quote: text,
+        issueKey: host?.key ?? null
       }
     });
     created += 1;

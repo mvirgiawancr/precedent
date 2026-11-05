@@ -6261,6 +6261,11 @@ function renderLedger(root2, { decisions, seeded }, options = {}) {
     )
   );
 }
+var CAPTURED = {
+  pattern: "captured from a comment",
+  demo: "demo record",
+  agent: "recorded by an agent"
+};
 function detail(decision, all) {
   if (!decision) {
     return el(
@@ -6277,7 +6282,7 @@ function detail(decision, all) {
     el("h2", { text: decision.statement }),
     el("p", {
       class: "meta",
-      text: `${decision.state} \xB7 decided ${decision.decidedAt} by ${decision.decidedBy}`
+      text: `${decision.state} \xB7 decided ${decision.decidedAt} by ${decision.decidedBy}` + (CAPTURED[decision.capturedBy] ? ` \xB7 ${CAPTURED[decision.capturedBy]}` : "")
     }),
     decision.rationale ? el("section", {}, el("h3", { text: "Why" }), el("p", { text: decision.rationale })) : null,
     el(
